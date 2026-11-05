@@ -34,57 +34,57 @@ jobs:
         run: |
           python -m pytest -v tests
 
-build:
-  name: Build and test Docker image
-  runs-on: ubuntu-latest
-  needs: test
+  build:
+    name: Build and test Docker image
+    runs-on: ubuntu-latest
+    needs: test
 
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v6
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-    - name: Build Docker image locally
-      uses: docker/build-push-action@v7
-      with:
-        context: .
-        push: false
-        load: true
-        tags: secure-coding-api:${{ github.sha }}
+      - name: Build Docker image locally
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          load: true
+          tags: secure-coding-api:${{ github.sha }}
 
-    - name: Run container
-      run: |
-        docker run -d \
-          --name secure-coding-api \
-          -p 5001:5001 \
-          secure-coding-api:${{ github.sha }}
+      - name: Run container
+        run: |
+          docker run -d \
+            --name secure-coding-api \
+            -p 5001:5001 \
+            secure-coding-api:${{ github.sha }}
 
-    - name: Smoke test container
-      run: |
-        sleep 5
-        curl --fail http://127.0.0.1:5001/
+      - name: Smoke test container
+        run: |
+          sleep 5
+          curl --fail http://127.0.0.1:5001/
 
-    - name: Show container logs if needed
-      if: failure()
-      run: |
-        docker logs secure-coding-api
+      - name: Show container logs if needed
+        if: failure()
+        run: |
+          docker logs secure-coding-api
 
-    - name: Stop container
-      if: always()
-      run: |
-        docker stop secure-coding-api
-        docker rm secure-coding-api
+      - name: Stop container
+        if: always()
+        run: |
+          docker stop secure-coding-api
+          docker rm secure-coding-api
 
-    - name: Log in to GitHub Container Registry
-      uses: docker/login-action@v4
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v7
-      with:
-        context: .
-        push: true
-        tags: |
-          ${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
