@@ -34,6 +34,10 @@ jobs:
         run: |
           python -m pytest -v tests
 
+      - name: Run security tests
+        run: |
+          python -m pytest -v tests_security    
+
   build:
     name: Build and test Docker image
     runs-on: ubuntu-latest
