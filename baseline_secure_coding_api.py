@@ -53,6 +53,21 @@ GRADES = [
     {"student_id": 1001, "course_id": "SSD", "grade": 16},
 ]
 
+def can_read_student_data(student_id):
+    role = flask.session.get("role")
+
+    if role == "admin":
+        return True
+
+    if role == "student":
+        session_student_id = flask.session.get("student_id")
+        return (
+            session_student_id is not None
+            and session_student_id == student_id
+        )
+
+    return False
+
 def find_grade(student_id, course_id):
     for row in GRADES:
         if row["student_id"] == student_id and row["course_id"] == course_id:
@@ -114,14 +129,24 @@ def me():
 
 @app.get("/students/<student_id>/profile")
 def get_profile(student_id):
-    profile = STUDENT_PROFILES.get(int(student_id))
+    sid = int(student_id)
+    profile = STUDENT_PROFILES.get(sid)
+
     if profile is None:
         return {"error": "student not found"}, 404
+
+    if not can_read_student_data(sid):
+        return {"error": "forbidden"}, 403
+    
     return flask.jsonify(profile)
 
 @app.get("/grades/<student_id>")
 def get_grades(student_id):
     sid = int(student_id)
+
+    if not can_read_student_data(sid):
+        return {"error": "forbidden"}, 403
+
     rows = [row for row in GRADES if row["student_id"] == sid]
     return flask.jsonify(rows)
 
@@ -132,6 +157,12 @@ def update_grade():
     student_id = data["student_id"]
     course_id = data["course_id"]
     grade = data["grade"]
+
+    if (
+        flask.session.get("role") == "professor"
+        and course_id not in flask.session.get("courses", [])
+    ):
+      return {"error": "forbidden"}, 403
 
     row = find_grade(student_id, course_id)
     if row is None:

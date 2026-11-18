@@ -1,0 +1,24 @@
+--- a/baseline_secure_coding_api.py
++++ b/baseline_secure_coding_api.py
+@@
+ @app.post("/grades/update")
+ def update_grade():
+     data = flask.request.get_json()
+
+     student_id = data["student_id"]
+     course_id = data["course_id"]
+     grade = data["grade"]
+
++    if (
++        flask.session.get("role") == "professor"
++        and course_id not in flask.session.get("courses", [])
++    ):
++        return {"error": "forbidden"}, 403
++
+     row = find_grade(student_id, course_id)
+     if row is None:
+         GRADES.append({"student_id": student_id, "course_id": course_id, "grade": grade})
+     else:
+         row["grade"] = grade
+
+     return {"status": "ok", "student_id": student_id, "course_id": course_id, "grade": grade}

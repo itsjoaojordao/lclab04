@@ -1,0 +1,18 @@
+--- a/baseline_secure_coding_api.py
++++ b/baseline_secure_coding_api.py
+@@
+ def can_read_student_data(student_id):
+     role = flask.session.get("role")
+
+     if role == "admin":
+         return True
+
+     if role == "student":
+-        return flask.session.get("student_id") == student_id
++        session_student_id = flask.session.get("student_id")
++        return (
++            session_student_id is not None
++            and session_student_id == student_id
++        )
+
+     return False
