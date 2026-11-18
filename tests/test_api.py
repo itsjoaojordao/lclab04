@@ -39,6 +39,11 @@ def test_get_student_profile():
 
 	response = client.get("/students/1001/profile")
 
+	client.post(
+        "/login",
+        data={"username": "alice", "password": "alicepw"},
+    )
+
 	assert response.status_code == 200
 	data = response.get_json()
 	assert data["student_id"] == 1001
@@ -46,6 +51,11 @@ def test_get_student_profile():
 
 def test_get_student_grades():
 	client = app.test_client()
+
+	client.post(
+			"/login",
+			data={"username": "alice", "password": "alicepw"},
+		)
 
 	response = client.get("/grades/1001")
 	
