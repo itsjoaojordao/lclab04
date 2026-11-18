@@ -37,12 +37,12 @@ def test_login_with_valid_credentials():
 def test_get_student_profile():
 	client = app.test_client()
 
-	response = client.get("/students/1001/profile")
-
 	client.post(
-        "/login",
-        data={"username": "alice", "password": "alicepw"},
-    )
+			"/login",
+			data={"username": "alice", "password": "alicepw"},
+		)
+
+	response = client.get("/students/1001/profile")
 
 	assert response.status_code == 200
 	data = response.get_json()
